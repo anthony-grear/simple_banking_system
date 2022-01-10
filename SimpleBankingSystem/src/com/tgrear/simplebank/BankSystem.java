@@ -1,4 +1,5 @@
 package com.tgrear.simplebank;
+import java.util.Random;
 
 class BankSystem {
 	
@@ -8,8 +9,15 @@ class BankSystem {
 		System.out.println("0. Exit");
 	}
 	
+	private static String generateRandomNumberAsString() {
+		Random random = new Random();
+		String randomNumberAsString = String.valueOf(random.nextInt());
+		return randomNumberAsString;
+	}
+	
 	public static void main(String[] args) {
-		displayMainMenu();
+//		displayMainMenu();
+		System.out.println(generateRandomNumberAsString());
 
 	}
 
