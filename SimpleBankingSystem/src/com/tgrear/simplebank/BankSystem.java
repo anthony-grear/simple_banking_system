@@ -2,15 +2,91 @@ package com.tgrear.simplebank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 class BankSystem {
 	static Map<String, String> accountMap = new HashMap<String, String>();
+	static Scanner scanner = new Scanner(System.in);
+	static boolean isLoggedIn = false;
+	private static boolean exit = false;
+	
+	public enum BankSystemState {
+		START_SYSTEM {
+			@Override
+			public BankSystemState nextState() {
+				return MAIN_MENU;
+			}
+		},
+		MAIN_MENU {
+			@Override
+			public BankSystemState nextState() {
+				displayMainMenu();
+				String input = scanner.next();
+				switch (input) {
+					case "1":
+						String accountNumber = generateAccountNumber();
+						displayAccountCreation(accountNumber);
+						return MAIN_MENU;
+					case "2":
+						System.out.println("Enter your card number:");
+						String cardNumber = scanner.next();		
+						System.out.println("Enter your PIN:");
+						String pinNumber = scanner.next();
+						if (accountMap.containsKey(cardNumber) && 
+							accountMap.get(cardNumber).equals(pinNumber)) {
+								isLoggedIn = true;
+								System.out.println("You have successfully logged in!");
+								return ACCOUNT_HOME;
+						} else {
+							System.out.println("Wrong card number or PIN!");
+							return MAIN_MENU;
+						}						
+					case "0":
+						return EXIT_SYSTEM;
+				}
+				return START_SYSTEM;
+			}
+		},		
+		ACCOUNT_HOME {
+			@Override
+			public BankSystemState nextState() {
+				successfulLoginMenu();
+				String input = scanner.next();
+				switch (input) {
+					case "1":
+						if (isLoggedIn == true) {
+							System.out.println("Balance: 0");
+							return ACCOUNT_HOME;
+						} else {
+							return MAIN_MENU;
+						}						
+					case "2":
+						isLoggedIn = false;
+						System.out.println("You have successfully logged out!");
+						return MAIN_MENU;
+					case "0":
+						return EXIT_SYSTEM;
+				}
+				return START_SYSTEM;
+			}
+		},
+		EXIT_SYSTEM {
+			@Override
+			public BankSystemState nextState() {
+				exit = true;
+				return this;
+			}
+		};
+		
+		public abstract BankSystemState nextState();
+	}
 	
 	private static void displayMainMenu() {
 		System.out.println("1. Create an account");
 		System.out.println("2. Log into account");
 		System.out.println("0. Exit");
 	}
+	
 	
 	private static String generateAccountNumber() {
 		Random random = new Random();
@@ -42,14 +118,12 @@ class BankSystem {
 		return pinNumber;
 	}
 	
-	private static void displayAccountCreation() {
-		String accountNumberOutput;
+	private static void displayAccountCreation(String accountNumber) {		
 		System.out.println("Your card has been created");
-		System.out.println("Your card number:");
-		accountNumberOutput = generateAccountNumber();
-		System.out.println(accountNumberOutput);
+		System.out.println("Your card number:");		
+		System.out.println(accountNumber);
 		System.out.println("Your card PIN:");
-		System.out.println(accountMap.get(accountNumberOutput));
+		System.out.println(accountMap.get(accountNumber));
 	}
 	
 	private static void successfulLoginMenu() {
@@ -59,12 +133,16 @@ class BankSystem {
 		System.out.println("0. Exit");
 	}
 	
+	private static void printAllAccounts() {
+		System.out.println(accountMap.toString());
+	}
+	
 	public static void main(String[] args) {
-//		displayMainMenu();
-//		System.out.println(generateAccountNumber());
-//		System.out.println(generatePinNumber());
-		displayAccountCreation();
-//		successfulLoginMenu();
+		BankSystemState state = BankSystemState.START_SYSTEM;
+		while (!exit) {
+			state = state.nextState();
+		}
+		printAllAccounts();
 
 	}
 
