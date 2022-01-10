@@ -45,11 +45,19 @@ class BankSystem {
 		System.out.println(generatePinNumber());
 	}
 	
+	private static void successfulLoginMenu() {
+		System.out.println("You have successfully logged in!\n");
+		System.out.println("1. Balance");
+		System.out.println("2. Log out");
+		System.out.println("0. Exit");
+	}
+	
 	public static void main(String[] args) {
 //		displayMainMenu();
 //		System.out.println(generateAccountNumber());
 //		System.out.println(generatePinNumber());
-		displayAccountCreation();
+//		displayAccountCreation();
+		successfulLoginMenu();
 
 	}
 
