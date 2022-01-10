@@ -9,13 +9,13 @@ class BankSystem {
 		System.out.println("0. Exit");
 	}
 	
-	private static String generateRandomNumberAsString() {
+	private static String generateAccountNumber() {
 		Random random = new Random();
 		String[] randomIntArr = new String[10];
 		for (int i = 0; i < 10; i++) {
 			randomIntArr[i] = String.valueOf(random.nextInt(10));			
 		}
-		String randomNumberAsString = "";
+		String randomNumberAsString = "400000";
 		for (int i = 0; i < 10; i++) {
 			randomNumberAsString +=randomIntArr[i];
 		}
@@ -25,7 +25,7 @@ class BankSystem {
 	
 	public static void main(String[] args) {
 //		displayMainMenu();
-		System.out.println(generateRandomNumberAsString());
+		System.out.println(generateAccountNumber());
 
 	}
 
