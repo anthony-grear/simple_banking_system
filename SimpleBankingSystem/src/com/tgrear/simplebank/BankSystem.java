@@ -28,17 +28,17 @@ class BankSystem {
 						displayAccountCreation(accountNumber);
 						return MAIN_MENU;
 					case "2":
-						System.out.println("Enter your card number:");
+						System.out.println("\nEnter your card number:");
 						String cardNumber = scanner.next();		
 						System.out.println("Enter your PIN:");
 						String pinNumber = scanner.next();
 						if (accountMap.containsKey(cardNumber) && 
 							accountMap.get(cardNumber).equals(pinNumber)) {
 								isLoggedIn = true;
-								System.out.println("You have successfully logged in!");
+								System.out.println("\nYou have successfully logged in!");
 								return ACCOUNT_HOME;
 						} else {
-							System.out.println("Wrong card number or PIN!");
+							System.out.println("\nWrong card number or PIN!\n");
 							return MAIN_MENU;
 						}						
 					case "0":
@@ -55,14 +55,14 @@ class BankSystem {
 				switch (input) {
 					case "1":
 						if (isLoggedIn == true) {
-							System.out.println("Balance: 0");
+							System.out.println("\nBalance: 0\n");
 							return ACCOUNT_HOME;
 						} else {
 							return MAIN_MENU;
 						}						
 					case "2":
 						isLoggedIn = false;
-						System.out.println("You have successfully logged out!");
+						System.out.println("\nYou have successfully logged out!");
 						return MAIN_MENU;
 					case "0":
 						return EXIT_SYSTEM;
@@ -73,6 +73,7 @@ class BankSystem {
 		EXIT_SYSTEM {
 			@Override
 			public BankSystemState nextState() {
+				System.out.println("\nBye!");
 				exit = true;
 				return this;
 			}
@@ -119,16 +120,16 @@ class BankSystem {
 	}
 	
 	private static void displayAccountCreation(String accountNumber) {		
-		System.out.println("Your card has been created");
+		System.out.println("\nYour card has been created");
 		System.out.println("Your card number:");		
 		System.out.println(accountNumber);
 		System.out.println("Your card PIN:");
-		System.out.println(accountMap.get(accountNumber));
+		System.out.println(accountMap.get(accountNumber)+"\n");
 	}
 	
 	private static void successfulLoginMenu() {
-		System.out.println("You have successfully logged in!\n");
-		System.out.println("1. Balance");
+		
+		System.out.println("\n1. Balance");
 		System.out.println("2. Log out");
 		System.out.println("0. Exit");
 	}
@@ -142,7 +143,7 @@ class BankSystem {
 		while (!exit) {
 			state = state.nextState();
 		}
-		printAllAccounts();
+		
 
 	}
 
