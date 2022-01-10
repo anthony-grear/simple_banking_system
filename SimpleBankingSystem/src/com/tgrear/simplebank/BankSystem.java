@@ -37,10 +37,19 @@ class BankSystem {
 		return pinNumber;
 	}
 	
-	public static void main(String[] args) {
-		displayMainMenu();
+	private static void displayAccountCreation() {
+		System.out.println("Your card has been created");
+		System.out.println("Your card number:");
 		System.out.println(generateAccountNumber());
+		System.out.println("Your card PIN:");
 		System.out.println(generatePinNumber());
+	}
+	
+	public static void main(String[] args) {
+//		displayMainMenu();
+//		System.out.println(generateAccountNumber());
+//		System.out.println(generatePinNumber());
+		displayAccountCreation();
 
 	}
 
