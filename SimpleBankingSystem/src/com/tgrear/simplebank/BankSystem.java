@@ -96,7 +96,8 @@ class BankSystem {
 		do {			
 			for (int i = 0; i < 10; i++) {
 				randomIntArr[i] = String.valueOf(random.nextInt(10));			
-			}			
+			}
+			accountNumber = "400000";
 			for (int i = 0; i < 10; i++) {
 				accountNumber +=randomIntArr[i];
 			}			
