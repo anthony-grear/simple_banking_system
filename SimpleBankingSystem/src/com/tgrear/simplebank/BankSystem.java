@@ -11,7 +11,15 @@ class BankSystem {
 	
 	private static String generateRandomNumberAsString() {
 		Random random = new Random();
-		String randomNumberAsString = String.valueOf(random.nextInt());
+		String[] randomIntArr = new String[10];
+		for (int i = 0; i < 10; i++) {
+			randomIntArr[i] = String.valueOf(random.nextInt(10));			
+		}
+		String randomNumberAsString = "";
+		for (int i = 0; i < 10; i++) {
+			randomNumberAsString +=randomIntArr[i];
+		}
+		
 		return randomNumberAsString;
 	}
 	
