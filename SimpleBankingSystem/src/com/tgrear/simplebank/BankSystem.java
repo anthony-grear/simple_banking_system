@@ -91,16 +91,17 @@ class BankSystem {
 	
 	private static String generateAccountNumber() {
 		Random random = new Random();
-		String[] randomIntArr = new String[10];
+		String[] randomIntArr = new String[9];
 		String accountNumber = "400000";
 		do {			
-			for (int i = 0; i < 10; i++) {
-				randomIntArr[i] = String.valueOf(random.nextInt(10));			
+			for (int i = 0; i < 9; i++) {
+				randomIntArr[i] = String.valueOf(random.nextInt(9));			
 			}
 			accountNumber = "400000";
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < 9; i++) {
 				accountNumber +=randomIntArr[i];
-			}			
+			}
+			accountNumber += generateCheckDigit(accountNumber);
 		} while (accountMap.containsKey(accountNumber));
 		accountMap.put(accountNumber, generatePinNumber());		
 		return accountNumber;
@@ -118,6 +119,30 @@ class BankSystem {
 		}
 		
 		return pinNumber;
+	}
+	
+	private static String generateCheckDigit(String accountNumber) {
+		String checkDigitString;
+		int checkDigitValue=0;
+		int tempNum;
+		int total = 0;
+		for (int i = 0; i < 15; i++) {
+			tempNum = Integer.valueOf(Character.toString(accountNumber.charAt(i)));
+			if (i % 2 == 0) {
+				tempNum = tempNum*2;
+				if (tempNum > 9) {
+					tempNum = tempNum - 9;
+				}
+				total += tempNum;
+			} else {
+				total += tempNum;
+			}
+		}
+		while ((total + checkDigitValue) % 10 != 0) {
+			checkDigitValue++;
+		}
+		checkDigitString = String.valueOf(checkDigitValue);
+		return checkDigitString;
 	}
 	
 	private static void displayAccountCreation(String accountNumber) {		
