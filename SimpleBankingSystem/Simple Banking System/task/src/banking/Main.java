@@ -12,14 +12,13 @@ public class Main {
 	private static boolean exit = false;
 	private static String dbName=null;
 	private static String flag=null;
-
+	private static String loggedInAccountNumber="0";
     
     public enum BankSystemState {
 		START_SYSTEM {
 			@Override
 			public BankSystemState nextState() {
-				System.out.println(flag);
-				System.out.println(dbName);
+
 				if ((dbName != null && !dbName.isEmpty())) {
 					createTable(dbName);
 					return MAIN_MENU;
@@ -46,6 +45,7 @@ public class Main {
 						if (findCard(cardNumber, pinNumber)) {
 								isLoggedIn = true;
 								System.out.println("\nYou have successfully logged in!");
+								loggedInAccountNumber = cardNumber;
 								return ACCOUNT_HOME;
 						} else {
 							System.out.println("\nWrong card number or PIN!\n");
@@ -59,13 +59,13 @@ public class Main {
 		},		
 		ACCOUNT_HOME {
 			@Override
-			public BankSystemState nextState() {
+			public BankSystemState nextState() throws SQLException {
 				successfulLoginMenu();
 				String input = scanner.next();
 				switch (input) {
 					case "1":
 						if (isLoggedIn) {
-							System.out.println("\nBalance: 0\n");
+							System.out.println("\nBalance: " + getAccountBalance() + "\n");
 							return ACCOUNT_HOME;
 						} else {
 							return MAIN_MENU;
@@ -156,6 +156,28 @@ public class Main {
 		acctNumAndPin[1] = pinNum;
 		return acctNumAndPin;
 	}
+
+	private static int getAccountBalance() throws SQLException {
+		String url = "jdbc:sqlite:" + dbName;
+		SQLiteDataSource dataSource = new SQLiteDataSource();
+		dataSource.setUrl(url);
+		String selectBalance = "SELECT balance FROM card WHERE number = ?";
+		ResultSet rs;
+		int currentBalance=0;
+		try (Connection con = dataSource.getConnection()) {
+			try (PreparedStatement statement = con.prepareStatement(selectBalance)) {
+				statement.setString(1, loggedInAccountNumber);
+				rs = statement.executeQuery();
+				currentBalance = rs.getInt(1);
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return currentBalance;
+	}
     
     private static void displayAccountCreation(String accountNumber, String pin) {
 		System.out.println("\nYour card has been created");
@@ -175,12 +197,15 @@ public class Main {
     private static void successfulLoginMenu() {
 		
 		System.out.println("\n1. Balance");
-		System.out.println("2. Log out");
+		System.out.println("2. Add income");
+		System.out.println("3. Do transfer");
+		System.out.println("4. Close account");
+		System.out.println("5. Log out");
 		System.out.println("0. Exit");
 	}
     
     private static void getConnection() {
-		String url = "jdbc:sqlite:db.s3db";
+		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
 		try (Connection con = dataSource.getConnection()) {
@@ -212,7 +237,7 @@ public class Main {
 	}
 
 	public static void insertCard(String cardNumber, String pinNumber) {
-		String url = "jdbc:sqlite:db.s3db";
+		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
 		try (Connection con = dataSource.getConnection()) {
@@ -230,7 +255,7 @@ public class Main {
 	}
 
 	private static boolean findCard(String cardNumber) throws SQLException {
-		String url = "jdbc:sqlite:db.s3db";
+		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
 		ResultSet rs = null;
@@ -256,7 +281,7 @@ public class Main {
 	}
 
 	private static boolean findCard(String cardNumber, String pinNumber) throws SQLException {
-		String url = "jdbc:sqlite:db.s3db";
+		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
 		ResultSet rs = null;
