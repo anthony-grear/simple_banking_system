@@ -73,6 +73,9 @@ public class Main {
 					case "2":
 						updateAccountBalance();
 						return ACCOUNT_HOME;
+					case "4":
+						closeAccount();
+						return MAIN_MENU;
 					case "5":
 						isLoggedIn = false;
 						System.out.println("\nYou have successfully logged out!");
@@ -204,6 +207,24 @@ public class Main {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void closeAccount() throws SQLException {
+		String url = "jdbc:sqlite:" + dbName;
+		SQLiteDataSource dataSource = new SQLiteDataSource();
+		dataSource.setUrl(url);
+		String selectAccount = "DELETE FROM card WHERE number = ?";
+		try (Connection con = dataSource.getConnection()) {
+			try (PreparedStatement statement = con.prepareStatement(selectAccount)) {
+				statement.setString(1, loggedInAccountNumber);
+				statement.executeUpdate();
+				System.out.println("\nThe account has been closed!\n");
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
     
     private static void displayAccountCreation(String accountNumber, String pin) {
