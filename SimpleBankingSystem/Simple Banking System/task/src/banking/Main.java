@@ -69,8 +69,11 @@ public class Main {
 							return ACCOUNT_HOME;
 						} else {
 							return MAIN_MENU;
-						}						
+						}
 					case "2":
+						updateAccountBalance();
+						return ACCOUNT_HOME;
+					case "5":
 						isLoggedIn = false;
 						System.out.println("\nYou have successfully logged out!");
 						return MAIN_MENU;
@@ -177,6 +180,30 @@ public class Main {
 			e.printStackTrace();
 		}
 		return currentBalance;
+	}
+
+	private static void updateAccountBalance() throws SQLException {
+		int deposit = 0;
+		String url = "jdbc:sqlite:" + dbName;
+		SQLiteDataSource dataSource = new SQLiteDataSource();
+		dataSource.setUrl(url);
+		String selectBalance = "UPDATE card SET balance = ? WHERE number = ?";
+		System.out.println("\nEnter income:");
+		deposit = scanner.nextInt();
+		int currentBalance=0;
+		try (Connection con = dataSource.getConnection()) {
+			try (PreparedStatement statement = con.prepareStatement(selectBalance)) {
+				statement.setInt(1, deposit);
+				statement.setString(2, loggedInAccountNumber);
+				statement.executeUpdate();
+				System.out.println("Income was added!");
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
     
     private static void displayAccountCreation(String accountNumber, String pin) {
