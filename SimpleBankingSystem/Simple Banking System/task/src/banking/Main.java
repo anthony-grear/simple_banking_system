@@ -73,6 +73,9 @@ public class Main {
 					case "2":
 						updateAccountBalance();
 						return ACCOUNT_HOME;
+					case "3":
+						doTransfer();
+						return ACCOUNT_HOME;
 					case "4":
 						closeAccount();
 						return MAIN_MENU;
@@ -97,7 +100,75 @@ public class Main {
 		
 		public abstract BankSystemState nextState() throws SQLException;
 	}
-    
+
+	private static boolean checkLuhn(String accountNumber) {
+		boolean isValid = false;
+		String accountNumberCheckDigit = accountNumber.substring(15);
+		String accountNumberWithoutCheckDigit = accountNumber.substring(0,16);
+		String validCheckDigit = generateCheckDigit(accountNumberWithoutCheckDigit);
+		if (validCheckDigit.equals(accountNumberCheckDigit)) {
+			isValid = true;
+		}
+		return isValid;
+	}
+
+	private static void doTransfer() throws SQLException {
+		System.out.println("Transfer\nEnter card number:");
+		String receiverAccountNumber = scanner.next();
+		if (receiverAccountNumber.length() !=16) {
+			assert true;
+		} else if (!findCard(receiverAccountNumber)) {
+			System.out.println("Such a card does not exist.");
+		} else if (receiverAccountNumber.equals(loggedInAccountNumber)) {
+			System.out.println("You can't transfer money to the same account!");
+		} else if (!checkLuhn(receiverAccountNumber)) {
+			System.out.println("Probably you made a mistake in the card number. Please try again!");
+		} else {
+			System.out.println("Enter how much money you want to transfer:");
+			int transferAmount = scanner.nextInt();
+			int currentAccountBalance = getAccountBalance();
+			if (transferAmount > currentAccountBalance) {
+				System.out.println("Not enough money!");
+			} else {
+				transferMoney(receiverAccountNumber, transferAmount);
+			}
+		}
+	}
+
+	private static void transferMoney(String receiverAcctNum, int receiverTransferAmount) {
+		String url = "jdbc:sqlite:" + dbName;
+		SQLiteDataSource dataSource = new SQLiteDataSource();
+		dataSource.setUrl(url);
+		String transferIn = "UPDATE card SET balance = balance + ? WHERE number = ?";
+		String transferOut = "UPDATE card SET balance = balance - ? WHERE number = ?";
+		try (Connection con = dataSource.getConnection()) {
+			con.setAutoCommit(false);
+			Savepoint sp1 = null;
+			try (PreparedStatement statementIn = con.prepareStatement(transferIn);
+				 PreparedStatement statementOut = con.prepareStatement(transferOut)) {
+
+				sp1 = con.setSavepoint();
+
+				statementIn.setInt(1, receiverTransferAmount);
+				statementIn.setString(2, receiverAcctNum);
+				statementIn.executeUpdate();
+
+				statementOut.setInt(1, receiverTransferAmount);
+				statementOut.setString(2, loggedInAccountNumber);
+				statementOut.executeUpdate();
+
+				con.commit();
+				System.out.println("Success!");
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+				con.rollback(sp1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
     private static String generateCheckDigit(String accountNumber) {
 		String checkDigitString;
 		int checkDigitValue=0;
@@ -361,13 +432,15 @@ public class Main {
         if (args.length == 2) {
 			flag = args[0];
 			dbName = args[1];
-
 		}
 		BankSystemState state = BankSystemState.START_SYSTEM;
 		while (!exit) {
 			state = state.nextState();
 		}
-
+//		System.out.println(checkLuhn("4000007476440729"));
+//		System.out.println(generateCheckDigit("400000747644072"));
+//		String str = "4000007476440729";
+//		System.out.println(str.substring(15));
     }
 }
 
