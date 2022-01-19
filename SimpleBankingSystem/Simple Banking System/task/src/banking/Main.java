@@ -117,12 +117,12 @@ public class Main {
 		String receiverAccountNumber = scanner.next();
 		if (receiverAccountNumber.length() !=16) {
 			assert true;
-		} else if (!findCard(receiverAccountNumber)) {
-			System.out.println("Such a card does not exist.");
-		} else if (receiverAccountNumber.equals(loggedInAccountNumber)) {
-			System.out.println("You can't transfer money to the same account!");
 		} else if (!checkLuhn(receiverAccountNumber)) {
 			System.out.println("Probably you made a mistake in the card number. Please try again!");
+		} else if (receiverAccountNumber.equals(loggedInAccountNumber)) {
+			System.out.println("You can't transfer money to the same account!");
+		} else if (!findCard(receiverAccountNumber)) {
+			System.out.println("Such a card does not exist.");
 		} else {
 			System.out.println("Enter how much money you want to transfer:");
 			int transferAmount = scanner.nextInt();
@@ -175,16 +175,14 @@ public class Main {
 		int tempNum;
 		int total = 0;
 		for (int i = 0; i < 15; i++) {
-			tempNum = Integer.valueOf(Character.toString(accountNumber.charAt(i)));
+			tempNum = Integer.parseInt(Character.toString(accountNumber.charAt(i)));
 			if (i % 2 == 0) {
 				tempNum = tempNum * 2;
 				if (tempNum > 9) {
 					tempNum = tempNum - 9;
 				}
-				total += tempNum;
-			} else {
-				total += tempNum;
 			}
+			total += tempNum;
 		}
 		while ((total + checkDigitValue) % 10 != 0) {
 			checkDigitValue++;
@@ -196,16 +194,16 @@ public class Main {
     private static String generateAccountNumber() {
 		Random random = new Random();
 		String[] randomIntArr = new String[9];
-		String accountNumber = "400000";
+		StringBuilder accountNumber = new StringBuilder("400000");
 		for (int i = 0; i < 9; i++) {
 			randomIntArr[i] = String.valueOf(random.nextInt(9));
 		}
-		accountNumber = "400000";
+		accountNumber = new StringBuilder("400000");
 		for (int i = 0; i < 9; i++) {
-			accountNumber +=randomIntArr[i];
+			accountNumber.append(randomIntArr[i]);
 		}
-		accountNumber += generateCheckDigit(accountNumber);
-		return accountNumber;
+		accountNumber.append(generateCheckDigit(accountNumber.toString()));
+		return accountNumber.toString();
 	}
     
     private static String generatePinNumber() {
@@ -214,11 +212,11 @@ public class Main {
 		for (int i = 0; i < 4; i++) {
 			randomIntArr[i] = String.valueOf(random.nextInt(10));			
 		}
-		String pinNumber = "";
+		StringBuilder pinNumber = new StringBuilder();
 		for (int i = 0; i < 4; i++) {
-			pinNumber +=randomIntArr[i];
+			pinNumber.append(randomIntArr[i]);
 		}
-		return pinNumber;
+		return pinNumber.toString();
 	}
 	
 	private static String[] registerAccountNumberAndPin() throws SQLException {
@@ -234,7 +232,7 @@ public class Main {
 		return acctNumAndPin;
 	}
 
-	private static int getAccountBalance() throws SQLException {
+	private static int getAccountBalance() {
 		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
@@ -256,15 +254,14 @@ public class Main {
 		return currentBalance;
 	}
 
-	private static void updateAccountBalance() throws SQLException {
-		int deposit = 0;
+	private static void updateAccountBalance() {
+		int deposit;
 		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
-		String selectBalance = "UPDATE card SET balance = ? WHERE number = ?";
+		String selectBalance = "UPDATE card SET balance = balance + ? WHERE number = ?";
 		System.out.println("\nEnter income:");
 		deposit = scanner.nextInt();
-		int currentBalance=0;
 		try (Connection con = dataSource.getConnection()) {
 			try (PreparedStatement statement = con.prepareStatement(selectBalance)) {
 				statement.setInt(1, deposit);
@@ -280,7 +277,7 @@ public class Main {
 
 	}
 
-	private static void closeAccount() throws SQLException {
+	private static void closeAccount() {
 		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
@@ -323,20 +320,7 @@ public class Main {
 		System.out.println("0. Exit");
 	}
     
-    private static void getConnection() {
-		String url = "jdbc:sqlite:" + dbName;
-		SQLiteDataSource dataSource = new SQLiteDataSource();
-		dataSource.setUrl(url);
-		try (Connection con = dataSource.getConnection()) {
-			if (con.isValid(5)) {
-				System.out.println("Connection is valid.");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void createTable(String dbName) {
+    private static void createTable(String dbName) {
 		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
@@ -373,11 +357,11 @@ public class Main {
 		}
 	}
 
-	private static boolean findCard(String cardNumber) throws SQLException {
+	private static boolean findCard(String cardNumber) {
 		String url = "jdbc:sqlite:" + dbName;
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl(url);
-		ResultSet rs = null;
+		ResultSet rs;
 		boolean cardFound = true;
 		try (Connection con = dataSource.getConnection()) {
 			try (PreparedStatement statement = con.prepareStatement("SELECT number, balance FROM card WHERE number = ?" );) {
@@ -437,10 +421,7 @@ public class Main {
 		while (!exit) {
 			state = state.nextState();
 		}
-//		System.out.println(checkLuhn("4000007476440729"));
-//		System.out.println(generateCheckDigit("400000747644072"));
-//		String str = "4000007476440729";
-//		System.out.println(str.substring(15));
+
     }
 }
 
